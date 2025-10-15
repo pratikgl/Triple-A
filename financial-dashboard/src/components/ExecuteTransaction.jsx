@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Label } from '@/components/ui/Label';
-import { transactionsApi } from '@/services/api';
+import { Alert, AlertDescription } from '@/components/ui/Alert';
+import { transactionsApi, accountsApi } from '@/services/api';
 
 export function ExecuteTransaction() {
   const [sourceAccountId, setSourceAccountId] = useState('');
@@ -11,6 +12,8 @@ export function ExecuteTransaction() {
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [transactionResult, setTransactionResult] = useState(null);
+  const [accountBalances, setAccountBalances] = useState(null);
 
   const validateForm = () => {
     if (!sourceAccountId.trim()) {
@@ -54,6 +57,8 @@ export function ExecuteTransaction() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage({ type: '', text: '' });
+    setTransactionResult(null);
+    setAccountBalances(null);
 
     if (!validateForm()) {
       return;
@@ -62,16 +67,39 @@ export function ExecuteTransaction() {
     setLoading(true);
 
     try {
+      const sourceId = parseInt(sourceAccountId);
+      const destId = parseInt(destinationAccountId);
+      const transferAmount = amount;
+
+      // Execute the transaction
       const result = await transactionsApi.createTransaction({
-        source_account_id: parseInt(sourceAccountId),
-        destination_account_id: parseInt(destinationAccountId),
-        amount: amount,
+        source_account_id: sourceId,
+        destination_account_id: destId,
+        amount: transferAmount,
       });
 
-      setMessage({
-        type: 'success',
-        text: `Transaction successful! Transferred ${result.amount} from Account ${result.source_account_id} to Account ${result.destination_account_id}`,
+      // If transaction succeeds, set result (even if empty response, use our own data)
+      setTransactionResult({
+        source_account_id: result?.source_account_id || sourceId,
+        destination_account_id: result?.destination_account_id || destId,
+        amount: result?.amount || transferAmount,
       });
+
+      // Fetch updated balances for both accounts
+      try {
+        const [sourceAccount, destAccount] = await Promise.all([
+          accountsApi.getAccount(sourceId),
+          accountsApi.getAccount(destId),
+        ]);
+
+        setAccountBalances({
+          source: sourceAccount,
+          destination: destAccount,
+        });
+      } catch (balanceError) {
+        console.error('Failed to fetch updated balances:', balanceError);
+        // Transaction was successful, just couldn't fetch balances
+      }
 
       // Reset form
       setSourceAccountId('');
@@ -80,8 +108,10 @@ export function ExecuteTransaction() {
     } catch (error) {
       setMessage({
         type: 'error',
-        text: error.response?.data?.message || error.message || 'Transaction failed',
+        text: error.message || 'Transaction failed',
       });
+      setTransactionResult(null);
+      setAccountBalances(null);
     } finally {
       setLoading(false);
     }
@@ -135,16 +165,79 @@ export function ExecuteTransaction() {
             {loading ? 'Processing...' : 'Execute Transaction'}
           </Button>
 
-          {message.text && (
-            <div
-              className={`p-3 rounded-md text-sm animate-slide-down transition-all duration-300 ${
-                message.type === 'success'
-                  ? 'bg-green-50 text-green-800 border border-green-200'
-                  : 'bg-red-50 text-red-800 border border-red-200'
-              }`}
-            >
-              {message.text}
+          {transactionResult && (
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-purple-100 dark:bg-purple-900 border-2 border-purple-400 dark:border-purple-600 animate-slide-down shadow-sm">
+                <div className="flex items-center gap-2 mb-3">
+                  <svg className="w-5 h-5 text-purple-700 dark:text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-sm font-semibold text-purple-900 dark:text-white">Transaction Successful!</span>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-purple-800 dark:text-purple-100">From Account:</span>
+                    <span className="text-sm font-bold text-purple-900 dark:text-white">{transactionResult.source_account_id}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-purple-800 dark:text-purple-100">To Account:</span>
+                    <span className="text-sm font-bold text-purple-900 dark:text-white">{transactionResult.destination_account_id}</span>
+                  </div>
+                  <div className="flex justify-between items-center pt-2 border-t border-purple-200 dark:border-purple-800">
+                    <span className="text-sm font-medium text-purple-800 dark:text-purple-100">Amount Transferred:</span>
+                    <span className="text-lg font-bold text-purple-700 dark:text-purple-200">${transactionResult.amount}</span>
+                  </div>
+                </div>
+              </div>
+
+              {accountBalances && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-slide-down">
+                  <div className="p-4 rounded-lg bg-orange-100 dark:bg-orange-900 border-2 border-orange-400 dark:border-orange-600 shadow-sm">
+                    <div className="flex items-center gap-2 mb-2">
+                      <svg className="w-4 h-4 text-orange-700 dark:text-orange-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                      <span className="text-xs font-semibold text-orange-900 dark:text-white uppercase">Source Account</span>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-medium text-orange-800 dark:text-orange-100">Account ID:</span>
+                        <span className="text-sm font-bold text-orange-900 dark:text-white">{accountBalances.source.account_id}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-medium text-orange-800 dark:text-orange-100">Updated Balance:</span>
+                        <span className="text-base font-bold text-orange-700 dark:text-orange-200">${accountBalances.source.balance}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-lg bg-teal-100 dark:bg-teal-900 border-2 border-teal-400 dark:border-teal-600 shadow-sm">
+                    <div className="flex items-center gap-2 mb-2">
+                      <svg className="w-4 h-4 text-teal-700 dark:text-teal-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                      <span className="text-xs font-semibold text-teal-900 dark:text-white uppercase">Destination Account</span>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-medium text-teal-800 dark:text-teal-100">Account ID:</span>
+                        <span className="text-sm font-bold text-teal-900 dark:text-white">{accountBalances.destination.account_id}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-medium text-teal-800 dark:text-teal-100">Updated Balance:</span>
+                        <span className="text-base font-bold text-teal-700 dark:text-teal-200">${accountBalances.destination.balance}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
+          )}
+
+          {message.text && (
+            <Alert variant="destructive" className="animate-slide-down">
+              <AlertDescription>{message.text}</AlertDescription>
+            </Alert>
           )}
         </form>
       </CardContent>
