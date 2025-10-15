@@ -28,11 +28,11 @@ export function TransactionHistory() {
       return;
     }
 
-    const accountId = parseInt(filterAccountId);
+    const searchTerm = filterAccountId.toLowerCase();
     const filtered = transactions.filter(
       (t) =>
-        t.source_account_id === accountId ||
-        t.destination_account_id === accountId
+        t.source_account_id.toString().includes(searchTerm) ||
+        t.destination_account_id.toString().includes(searchTerm)
     );
     setFilteredTransactions(filtered);
   };
@@ -124,9 +124,6 @@ export function TransactionHistory() {
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-medium text-gray-500">
                     {formatDate(transaction.timestamp)}
-                  </span>
-                  <span className="text-xs font-mono bg-gray-100 px-2 py-0.5 rounded text-gray-600">
-                    ID: {transaction.id}
                   </span>
                 </div>
 
