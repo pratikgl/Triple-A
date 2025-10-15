@@ -1,16 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
+import { AutocompleteInput } from '@/components/ui/AutocompleteInput';
 import { Button } from '@/components/ui/Button';
 import { Label } from '@/components/ui/Label';
 import { Alert, AlertDescription } from '@/components/ui/Alert';
 import { accountsApi } from '@/services/api';
+import { storageApi } from '@/lib/storage';
+import { useToast } from '@/components/ui/Toast';
 
 export function ViewAccount() {
   const [accountId, setAccountId] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [accountData, setAccountData] = useState(null);
+  const [accountSuggestions, setAccountSuggestions] = useState([]);
+  const toast = useToast();
+
+  useEffect(() => {
+    // Load account IDs for autocomplete
+    const ids = storageApi.getAccountIds();
+    setAccountSuggestions(ids);
+  }, []);
 
   const validateForm = () => {
     if (!accountId.trim()) {
@@ -41,6 +51,17 @@ export function ViewAccount() {
       const result = await accountsApi.getAccount(parseInt(accountId));
 
       setAccountData(result);
+      
+      // Save to localStorage
+      storageApi.saveAccount(result);
+      
+      // Update suggestions
+      const ids = storageApi.getAccountIds();
+      setAccountSuggestions(ids);
+      
+      // Show success toast
+      toast.success(`Account #${result.account_id} found with balance $${result.balance}`);
+      
       setMessage({
         type: 'success',
         text: `Account found!`,
@@ -50,6 +71,7 @@ export function ViewAccount() {
         type: 'error',
         text: error.message || 'Failed to fetch account',
       });
+      toast.error(error.message || 'Failed to fetch account');
       setAccountData(null);
     } finally {
       setLoading(false);
@@ -66,13 +88,14 @@ export function ViewAccount() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="view-account-id">Account ID</Label>
-            <Input
+            <AutocompleteInput
               id="view-account-id"
               type="text"
               placeholder="Enter account ID to view"
               value={accountId}
               onChange={(e) => setAccountId(e.target.value)}
               disabled={loading}
+              suggestions={accountSuggestions}
             />
           </div>
 

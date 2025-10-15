@@ -2,11 +2,27 @@
 
 A React-based financial account management dashboard for creating accounts, checking balances, and executing transactions.
 
+## Features
+
+This dashboard includes enhanced features beyond basic API integration:
+
+- ✅ **Balance Verification** - Check balances before executing transactions
+- ✅ **Transaction History** - Complete audit trail with filtering
+- ✅ **Account Manager** - Centralized account management
+- ✅ **Smart Autocomplete** - Account ID suggestions
+- ✅ **Toast Notifications** - Real-time feedback
+- ✅ **Amount Presets** - Quick-select buttons ($10, $50, $100, $500)
+
+All features use browser localStorage for data persistence - no additional backend required.
+
+📖 **[View detailed features documentation →](./FEATURES.md)**
+
 ## Tech Stack
 
 - React 19 + Vite
 - Tailwind CSS + shadcn/ui
 - Axios for API calls
+- Browser localStorage for persistence
 
 ## Setup Instructions
 
@@ -47,12 +63,25 @@ npm run preview
 financial-dashboard/
 ├── src/
 │   ├── components/          # React components
-│   │   ├── ui/             # Reusable UI components (shadcn/ui)
+│   │   ├── ui/             # Reusable UI components
+│   │   │   ├── Card.jsx
+│   │   │   ├── Input.jsx
+│   │   │   ├── Button.jsx
+│   │   │   ├── Toast.jsx            # Toast notifications
+│   │   │   └── AutocompleteInput.jsx # Smart autocomplete
 │   │   ├── CreateAccount.jsx
 │   │   ├── ViewAccount.jsx
-│   │   └── ExecuteTransaction.jsx
+│   │   ├── ExecuteTransaction.jsx
+│   │   ├── AccountManager.jsx        # Account management
+│   │   └── TransactionHistory.jsx    # Transaction timeline
 │   ├── services/           # API integration
-│   └── lib/                # Utilities
+│   │   └── api.js
+│   ├── lib/                # Utilities
+│   │   ├── utils.js
+│   │   └── storage.js      # localStorage wrapper
+│   ├── App.jsx
+│   └── main.jsx
+├── FEATURES.md             # Detailed features documentation
 └── package.json
 ```
 

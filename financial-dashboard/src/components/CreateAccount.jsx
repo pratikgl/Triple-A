@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/Button';
 import { Label } from '@/components/ui/Label';
 import { Alert, AlertDescription } from '@/components/ui/Alert';
 import { accountsApi } from '@/services/api';
+import { storageApi } from '@/lib/storage';
+import { useToast } from '@/components/ui/Toast';
 
 export function CreateAccount() {
   const [accountId, setAccountId] = useState('');
@@ -12,6 +14,7 @@ export function CreateAccount() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [createdAccount, setCreatedAccount] = useState(null);
+  const toast = useToast();
 
   const validateForm = () => {
     if (!accountId.trim()) {
@@ -56,6 +59,12 @@ export function CreateAccount() {
 
       setCreatedAccount(result);
 
+      // Save to localStorage
+      storageApi.saveAccount(result);
+
+      // Show success toast
+      toast.success(`Account #${result.account_id} created successfully with balance $${result.balance}`);
+
       // Reset form
       setAccountId('');
       setInitialBalance('');
@@ -64,6 +73,7 @@ export function CreateAccount() {
         type: 'error',
         text: error.message || 'Failed to create account',
       });
+      toast.error(error.message || 'Failed to create account');
       setCreatedAccount(null);
     } finally {
       setLoading(false);

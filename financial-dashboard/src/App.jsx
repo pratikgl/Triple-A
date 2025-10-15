@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { CreateAccount } from '@/components/CreateAccount';
 import { ViewAccount } from '@/components/ViewAccount';
 import { ExecuteTransaction } from '@/components/ExecuteTransaction';
+import { AccountManager } from '@/components/AccountManager';
+import { TransactionHistory } from '@/components/TransactionHistory';
+import { ToastProvider } from '@/components/ui/Toast';
 
 function App() {
   const [activeTab, setActiveTab] = useState('create');
@@ -10,20 +13,23 @@ function App() {
     { id: 'create', label: 'Create Account' },
     { id: 'view', label: 'View Balance' },
     { id: 'transaction', label: 'Execute Transaction' },
+    { id: 'accounts', label: 'My Accounts' },
+    { id: 'history', label: 'History' },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-8 px-4">
-      <div className="max-w-4xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="text-center mb-8 animate-fade-in">
-          <h1 className="text-5xl font-bold text-gray-900 mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
-            Financial Account Dashboard
-          </h1>
-          <p className="text-gray-600 text-lg">
-            Manage accounts and execute transactions
-          </p>
-        </div>
+    <ToastProvider>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-8 px-4">
+        <div className="max-w-4xl mx-auto space-y-8">
+          {/* Header */}
+          <div className="text-center mb-8 animate-fade-in">
+            <h1 className="text-5xl font-bold text-gray-900 mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+              Financial Account Dashboard
+            </h1>
+            <p className="text-gray-600 text-lg">
+              Manage accounts and execute transactions
+            </p>
+          </div>
 
         {/* Tab Navigation */}
         <div className="bg-white rounded-xl shadow-md p-2 animate-slide-up">
@@ -61,6 +67,16 @@ function App() {
               <ExecuteTransaction />
             </div>
           )}
+          {activeTab === 'accounts' && (
+            <div className="animate-slide-up">
+              <AccountManager />
+            </div>
+          )}
+          {activeTab === 'history' && (
+            <div className="animate-slide-up">
+              <TransactionHistory />
+            </div>
+          )}
         </div>
 
         {/* Footer */}
@@ -69,8 +85,9 @@ function App() {
             API Server: http://localhost:8860
           </p>
         </div>
+        </div>
       </div>
-    </div>
+    </ToastProvider>
   );
 }
 
