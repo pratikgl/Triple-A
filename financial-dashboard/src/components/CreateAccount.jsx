@@ -92,14 +92,17 @@ export function CreateAccount() {
 
           <div className="space-y-2">
             <Label htmlFor="initial-balance">Initial Balance</Label>
-            <Input
-              id="initial-balance"
-              type="text"
-              placeholder="Enter initial balance"
-              value={initialBalance}
-              onChange={(e) => setInitialBalance(e.target.value)}
-              disabled={loading}
-            />
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">$</span>
+              <Input
+                id="initial-balance"
+                type="text"
+                placeholder="0.00"
+                value={initialBalance}
+                onChange={(e) => setInitialBalance(e.target.value)}
+                disabled={loading}
+              />
+            </div>
           </div>
 
           <Button type="submit" disabled={loading} className="w-full">

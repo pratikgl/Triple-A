@@ -151,14 +151,17 @@ export function ExecuteTransaction() {
 
           <div className="space-y-2">
             <Label htmlFor="amount">Amount</Label>
-            <Input
-              id="amount"
-              type="text"
-              placeholder="Enter amount to transfer"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              disabled={loading}
-            />
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">$</span>
+              <Input
+                id="amount"
+                type="text"
+                placeholder="0.00"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                disabled={loading}
+              />
+            </div>
           </div>
 
           <Button type="submit" disabled={loading} className="w-full">
