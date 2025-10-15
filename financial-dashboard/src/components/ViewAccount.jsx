@@ -1,15 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
+import { AutocompleteInput } from '@/components/ui/AutocompleteInput';
 import { Button } from '@/components/ui/Button';
 import { Label } from '@/components/ui/Label';
+import { Alert, AlertDescription } from '@/components/ui/Alert';
 import { accountsApi } from '@/services/api';
+import { storageApi } from '@/lib/storage';
+import { useToast } from '@/components/ui/Toast';
 
 export function ViewAccount() {
   const [accountId, setAccountId] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [accountData, setAccountData] = useState(null);
+  const [accountSuggestions, setAccountSuggestions] = useState([]);
+  const toast = useToast();
+
+  useEffect(() => {
+    // Load account IDs for autocomplete
+    const ids = storageApi.getAccountIds();
+    setAccountSuggestions(ids);
+  }, []);
 
   const validateForm = () => {
     if (!accountId.trim()) {
@@ -40,6 +51,17 @@ export function ViewAccount() {
       const result = await accountsApi.getAccount(parseInt(accountId));
 
       setAccountData(result);
+      
+      // Save to localStorage
+      storageApi.saveAccount(result);
+      
+      // Update suggestions
+      const ids = storageApi.getAccountIds();
+      setAccountSuggestions(ids);
+      
+      // Show success toast
+      toast.success(`Account #${result.account_id} found with balance $${result.balance}`);
+      
       setMessage({
         type: 'success',
         text: `Account found!`,
@@ -47,8 +69,9 @@ export function ViewAccount() {
     } catch (error) {
       setMessage({
         type: 'error',
-        text: error.response?.data?.message || error.message || 'Failed to fetch account',
+        text: error.message || 'Failed to fetch account',
       });
+      toast.error(error.message || 'Failed to fetch account');
       setAccountData(null);
     } finally {
       setLoading(false);
@@ -65,13 +88,14 @@ export function ViewAccount() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="view-account-id">Account ID</Label>
-            <Input
+            <AutocompleteInput
               id="view-account-id"
               type="text"
               placeholder="Enter account ID to view"
               value={accountId}
               onChange={(e) => setAccountId(e.target.value)}
               disabled={loading}
+              suggestions={accountSuggestions}
             />
           </div>
 
@@ -80,30 +104,30 @@ export function ViewAccount() {
           </Button>
 
           {accountData && (
-            <div className="p-4 rounded-md bg-blue-50 border border-blue-200">
+            <div className="p-4 rounded-lg bg-blue-100 dark:bg-blue-900 border-2 border-blue-400 dark:border-blue-600 animate-slide-down shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <svg className="w-5 h-5 text-blue-700 dark:text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-sm font-semibold text-blue-900 dark:text-white">Account Found!</span>
+              </div>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-gray-600">Account ID:</span>
-                  <span className="text-sm font-semibold text-gray-900">{accountData.account_id}</span>
+                  <span className="text-sm font-medium text-blue-800 dark:text-blue-100">Account ID:</span>
+                  <span className="text-sm font-bold text-blue-900 dark:text-white">{accountData.account_id}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-gray-600">Balance:</span>
-                  <span className="text-lg font-bold text-blue-600">${accountData.balance}</span>
+                  <span className="text-sm font-medium text-blue-800 dark:text-blue-100">Balance:</span>
+                  <span className="text-lg font-bold text-blue-700 dark:text-blue-200">${accountData.balance}</span>
                 </div>
               </div>
             </div>
           )}
 
           {message.text && !accountData && (
-            <div
-              className={`p-3 rounded-md text-sm ${
-                message.type === 'success'
-                  ? 'bg-green-50 text-green-800 border border-green-200'
-                  : 'bg-red-50 text-red-800 border border-red-200'
-              }`}
-            >
-              {message.text}
-            </div>
+            <Alert variant="destructive" className="animate-slide-down">
+              <AlertDescription>{message.text}</AlertDescription>
+            </Alert>
           )}
         </form>
       </CardContent>

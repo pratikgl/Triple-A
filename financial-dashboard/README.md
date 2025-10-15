@@ -1,37 +1,42 @@
 # Financial Account Dashboard
 
-A simple and elegant financial account transfer dashboard built with React, Vite, Tailwind CSS, and shadcn/ui components.
+A React-based financial account management dashboard for creating accounts, checking balances, and executing transactions.
 
 ## Features
 
-- **Create Account**: Create new financial accounts with initial balances
-- **View Account Balance**: Check the balance of existing accounts
-- **Execute Transaction**: Transfer funds between accounts
-- **Form Validation**: All forms include validation for required fields and numeric values
-- **Loading States**: Buttons are disabled during API calls to prevent duplicate submissions
-- **Error Handling**: Clear error messages for failed operations
-- **Responsive Design**: Clean, centered layout that works on all screen sizes
+This dashboard includes enhanced features beyond basic API integration:
+
+- ✅ **Balance Verification** - Check balances before executing transactions
+- ✅ **Transaction History** - Complete audit trail with filtering
+- ✅ **Account Manager** - Centralized account management
+- ✅ **Smart Autocomplete** - Account ID suggestions
+- ✅ **Toast Notifications** - Real-time feedback
+- ✅ **Amount Presets** - Quick-select buttons ($10, $50, $100, $500)
+
+All features use browser localStorage for data persistence - no additional backend required.
+
+📖 **[View detailed features documentation →](./FEATURES.md)**
 
 ## Tech Stack
 
-- **React 18** - UI library
-- **Vite** - Build tool and development server
-- **Tailwind CSS** - Utility-first CSS framework
-- **shadcn/ui** - Beautiful UI components built with Radix UI and Tailwind
-- **Axios** - HTTP client for API calls
-- **Lucide React** - Icon library
+- React 19 + Vite
+- Tailwind CSS + shadcn/ui
+- Axios for API calls
+- Browser localStorage for persistence
 
-## Prerequisites
+## Setup Instructions
 
-- Node.js (v16 or higher)
+### Prerequisites
+- Node.js v16+
 - npm or yarn
-- Backend server running on `http://localhost:8860`
+- API server running on `http://localhost:8860`
 
-## Installation
+### Installation
 
-1. Clone or navigate to the project directory:
+1. Clone and navigate to the project:
 ```bash
-cd financial-dashboard
+git clone git@github.com:pratikgl/Triple-A.git
+cd Triple-A/financial-dashboard
 ```
 
 2. Install dependencies:
@@ -39,29 +44,16 @@ cd financial-dashboard
 npm install
 ```
 
-## Running the Application
-
-1. Make sure the backend server is running on `http://localhost:8860`
-
-2. Start the development server:
+3. Start development server:
 ```bash
 npm run dev
 ```
 
-3. Open your browser and navigate to:
-```
-http://localhost:5173
-```
+4. Open `http://localhost:5173`
 
-## Building for Production
-
-To create a production build:
+### Production Build
 ```bash
 npm run build
-```
-
-To preview the production build locally:
-```bash
 npm run preview
 ```
 
@@ -70,104 +62,109 @@ npm run preview
 ```
 financial-dashboard/
 ├── src/
-│   ├── components/
-│   │   ├── ui/              # shadcn/ui components
-│   │   │   ├── Button.jsx
+│   ├── components/          # React components
+│   │   ├── ui/             # Reusable UI components
 │   │   │   ├── Card.jsx
 │   │   │   ├── Input.jsx
-│   │   │   └── Label.jsx
+│   │   │   ├── Button.jsx
+│   │   │   ├── Toast.jsx            # Toast notifications
+│   │   │   └── AutocompleteInput.jsx # Smart autocomplete
 │   │   ├── CreateAccount.jsx
 │   │   ├── ViewAccount.jsx
-│   │   └── ExecuteTransaction.jsx
-│   ├── lib/
-│   │   └── utils.js         # Utility functions
-│   ├── services/
-│   │   └── api.js           # API client
-│   ├── App.jsx              # Main application component
-│   ├── main.jsx             # Application entry point
-│   └── index.css            # Global styles with Tailwind directives
-├── public/                  # Static assets
-├── index.html
-├── package.json
-├── tailwind.config.js
-├── postcss.config.js
-└── vite.config.js
+│   │   ├── ExecuteTransaction.jsx
+│   │   ├── AccountManager.jsx        # Account management
+│   │   └── TransactionHistory.jsx    # Transaction timeline
+│   ├── services/           # API integration
+│   │   └── api.js
+│   ├── lib/                # Utilities
+│   │   ├── utils.js
+│   │   └── storage.js      # localStorage wrapper
+│   ├── App.jsx
+│   └── main.jsx
+├── FEATURES.md             # Detailed features documentation
+└── package.json
 ```
 
 ## API Endpoints
 
-The application connects to the following backend endpoints:
+The application expects these endpoints on `http://localhost:8860`:
 
-### Create Account
-- **POST** `/accounts`
-- Request body:
-  ```json
-  {
-    "account_id": 123,
-    "initial_balance": "100.23344"
-  }
-  ```
-
-### Get Account Balance
-- **GET** `/accounts/{account_id}`
-- Response:
-  ```json
-  {
-    "account_id": 123,
-    "balance": "100.23344"
-  }
-  ```
-
-### Execute Transaction
-- **POST** `/transactions`
-- Request body:
-  ```json
-  {
-    "source_account_id": 123,
-    "destination_account_id": 456,
-    "amount": "100.12345"
-  }
-  ```
-
-## Form Validation
-
-All forms include validation for:
-- Required fields
-- Numeric values (integers for account IDs, positive numbers for amounts)
-- Business logic (e.g., source and destination accounts must be different)
-
-## Customization
-
-### Changing the Backend URL
-
-Edit `src/services/api.js` and update the `API_BASE_URL` constant:
-```javascript
-const API_BASE_URL = 'http://your-backend-url:port';
+**POST /accounts** - Create account
+```json
+{
+  "account_id": 123,
+  "initial_balance": "100.23344"
+}
 ```
 
-### Styling
+**GET /accounts/{account_id}** - Get account balance
+```json
+{
+  "account_id": 123,
+  "balance": "100.23344"
+}
+```
 
-The application uses Tailwind CSS for styling. You can customize:
-- Colors and theme in `tailwind.config.js`
-- Global styles in `src/index.css`
-- Component-specific styles inline with Tailwind classes
+**POST /transactions** - Execute transaction
+```json
+{
+  "source_account_id": 123,
+  "destination_account_id": 456,
+  "amount": "100.12345"
+}
+```
+
+## Technical Choices
+
+**Architecture**
+- Component-based structure with separation of concerns
+- UI components isolated in `components/ui/` (shadcn/ui pattern)
+- Centralized API client in `services/api.js`
+- Local state management using React hooks (no Redux needed for this scope)
+
+**Styling**
+- Tailwind CSS for rapid development and consistent design
+- shadcn/ui for accessible, high-quality components
+- Custom animations for better UX
+
+**Build Tool**
+- Vite for fast development server and optimized builds
+
+**Validation & Error Handling**
+- Client-side validation for immediate feedback (account IDs must be integers, amounts positive)
+- Comprehensive error handling with user-friendly messages
+- Loading states to prevent duplicate submissions
+
+## Assumptions
+
+1. API server runs on `http://localhost:8860` with CORS enabled for `http://localhost:5173`
+2. Balances and amounts are strings (preserves decimal precision)
+3. Account IDs are integers
+4. Concurrency and race conditions handled by API
+5. No authentication required
+6. API returns structured error responses with appropriate HTTP status codes
+
+## Configuration
+
+To change the API URL, edit `src/services/api.js`:
+```javascript
+const API_BASE_URL = import.meta.env.DEV ? '/api' : 'http://your-api-url:port';
+```
+
+Or use environment variables:
+```bash
+# .env
+VITE_API_URL=https://your-api.com
+```
 
 ## Troubleshooting
 
-### Backend Connection Issues
+**"Network error: Unable to reach the server"**
+- Verify API server is running on `http://localhost:8860`
+- Check CORS is configured correctly
 
-If you see connection errors:
-1. Verify the backend is running on `http://localhost:8860`
-2. Check for CORS configuration on the backend
-3. Ensure the backend endpoints match the API specification
-
-### Build Issues
-
-If you encounter build errors:
-1. Delete `node_modules` and `package-lock.json`
-2. Run `npm install` again
-3. Clear Vite cache: `rm -rf node_modules/.vite`
-
-## License
-
-MIT
+**Build fails**
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```

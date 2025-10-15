@@ -3,13 +3,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Label } from '@/components/ui/Label';
+import { Alert, AlertDescription } from '@/components/ui/Alert';
 import { accountsApi } from '@/services/api';
+import { storageApi } from '@/lib/storage';
+import { useToast } from '@/components/ui/Toast';
 
 export function CreateAccount() {
   const [accountId, setAccountId] = useState('');
   const [initialBalance, setInitialBalance] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [createdAccount, setCreatedAccount] = useState(null);
+  const toast = useToast();
 
   const validateForm = () => {
     if (!accountId.trim()) {
@@ -38,6 +43,7 @@ export function CreateAccount() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage({ type: '', text: '' });
+    setCreatedAccount(null);
 
     if (!validateForm()) {
       return;
@@ -51,10 +57,13 @@ export function CreateAccount() {
         initial_balance: initialBalance,
       });
 
-      setMessage({
-        type: 'success',
-        text: `Account created successfully! Account ID: ${result.account_id}, Balance: ${result.initial_balance}`,
-      });
+      setCreatedAccount(result);
+
+      // Save to localStorage
+      storageApi.saveAccount(result);
+
+      // Show success toast
+      toast.success(`Account #${result.account_id} created successfully with balance $${result.balance}`);
 
       // Reset form
       setAccountId('');
@@ -62,8 +71,10 @@ export function CreateAccount() {
     } catch (error) {
       setMessage({
         type: 'error',
-        text: error.response?.data?.message || error.message || 'Failed to create account',
+        text: error.message || 'Failed to create account',
       });
+      toast.error(error.message || 'Failed to create account');
+      setCreatedAccount(null);
     } finally {
       setLoading(false);
     }
@@ -91,30 +102,48 @@ export function CreateAccount() {
 
           <div className="space-y-2">
             <Label htmlFor="initial-balance">Initial Balance</Label>
-            <Input
-              id="initial-balance"
-              type="text"
-              placeholder="Enter initial balance"
-              value={initialBalance}
-              onChange={(e) => setInitialBalance(e.target.value)}
-              disabled={loading}
-            />
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">$</span>
+              <Input
+                id="initial-balance"
+                type="text"
+                placeholder="0.00"
+                value={initialBalance}
+                onChange={(e) => setInitialBalance(e.target.value)}
+                disabled={loading}
+              />
+            </div>
           </div>
 
           <Button type="submit" disabled={loading} className="w-full">
             {loading ? 'Creating...' : 'Create Account'}
           </Button>
 
-          {message.text && (
-            <div
-              className={`p-3 rounded-md text-sm ${
-                message.type === 'success'
-                  ? 'bg-green-50 text-green-800 border border-green-200'
-                  : 'bg-red-50 text-red-800 border border-red-200'
-              }`}
-            >
-              {message.text}
+          {createdAccount && (
+            <div className="p-4 rounded-lg bg-green-100 dark:bg-green-900 border-2 border-green-400 dark:border-green-600 animate-slide-down shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <svg className="w-5 h-5 text-green-700 dark:text-green-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-sm font-semibold text-green-900 dark:text-white">Account Created Successfully!</span>
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-green-800 dark:text-green-100">Account ID:</span>
+                  <span className="text-sm font-bold text-green-900 dark:text-white">{createdAccount.account_id}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-green-800 dark:text-green-100">Initial Balance:</span>
+                  <span className="text-lg font-bold text-green-700 dark:text-green-200">${createdAccount.balance}</span>
+                </div>
+              </div>
             </div>
+          )}
+
+          {message.text && (
+            <Alert variant="destructive" className="animate-slide-down">
+              <AlertDescription>{message.text}</AlertDescription>
+            </Alert>
           )}
         </form>
       </CardContent>
