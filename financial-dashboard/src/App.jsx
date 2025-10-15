@@ -7,9 +7,9 @@ function App() {
   const [activeTab, setActiveTab] = useState('create');
 
   const tabs = [
-    { id: 'create', label: 'Create Account', icon: '➕' },
-    { id: 'view', label: 'View Balance', icon: '👁️' },
-    { id: 'transaction', label: 'Execute Transaction', icon: '💸' },
+    { id: 'create', label: 'Create Account' },
+    { id: 'view', label: 'View Balance' },
+    { id: 'transaction', label: 'Execute Transaction' },
   ];
 
   return (
@@ -32,13 +32,12 @@ function App() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex items-center justify-center gap-2 px-3 sm:px-4 py-3 rounded-lg font-medium transition-all duration-300 cursor-pointer text-sm sm:text-base ${
+                className={`flex-1 flex items-center justify-center px-3 sm:px-4 py-3 rounded-lg font-medium transition-all duration-300 cursor-pointer text-sm sm:text-base ${
                   activeTab === tab.id
                     ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg sm:scale-105'
                     : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                 }`}
               >
-                <span className="text-xl sm:text-2xl">{tab.icon}</span>
                 <span className="truncate">{tab.label}</span>
               </button>
             ))}
