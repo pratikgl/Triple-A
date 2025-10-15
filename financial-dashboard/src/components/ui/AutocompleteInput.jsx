@@ -71,9 +71,9 @@ export function AutocompleteInput({
       />
 
       {showSuggestions && filteredSuggestions.length > 0 && !disabled && (
-        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-xl max-h-48 overflow-y-auto">
-          <div className="py-1">
-            <div className="px-3 py-2 text-xs font-medium text-gray-600 bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-200">
+        <div className="absolute z-10 w-full mt-2 bg-white border-2 border-gray-100 rounded-xl shadow-xl shadow-gray-200/50 max-h-64 overflow-hidden animate-slide-down backdrop-blur-sm">
+          <div className="overflow-y-auto max-h-64">
+            <div className="sticky top-0 px-4 py-2.5 text-xs font-semibold text-gray-600 bg-gradient-to-r from-blue-50/80 to-purple-50/80 border-b-2 border-gray-100 backdrop-blur-sm">
               Recent Account IDs
             </div>
             {filteredSuggestions.map((suggestion, index) => (
@@ -81,10 +81,10 @@ export function AutocompleteInput({
                 key={index}
                 type="button"
                 onClick={() => handleSuggestionClick(suggestion)}
-                className="w-full px-3 py-2.5 text-left text-sm hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-blue-700 text-gray-700 transition-all duration-150 flex items-center gap-2 group border-b border-gray-100 last:border-b-0"
+                className="w-full px-4 py-3 text-left text-sm text-gray-700 transition-all duration-200 flex items-center gap-3 group border-b border-gray-50 last:border-b-0 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:scale-[1.02] hover:shadow-sm"
               >
                 <svg
-                  className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors"
+                  className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-all duration-200 group-hover:scale-110"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -96,7 +96,7 @@ export function AutocompleteInput({
                     d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
                   />
                 </svg>
-                <span className="font-medium text-gray-900 group-hover:text-blue-700">
+                <span className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
                   Account #{suggestion}
                 </span>
               </button>
