@@ -137,7 +137,7 @@ export function ExecuteTransaction() {
 
           {message.text && (
             <div
-              className={`p-3 rounded-md text-sm ${
+              className={`p-3 rounded-md text-sm animate-slide-down transition-all duration-300 ${
                 message.type === 'success'
                   ? 'bg-green-50 text-green-800 border border-green-200'
                   : 'bg-red-50 text-red-800 border border-red-200'

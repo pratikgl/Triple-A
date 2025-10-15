@@ -80,7 +80,7 @@ export function ViewAccount() {
           </Button>
 
           {accountData && (
-            <div className="p-4 rounded-md bg-blue-50 border border-blue-200">
+            <div className="p-4 rounded-md bg-blue-50 border border-blue-200 animate-slide-down">
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium text-gray-600">Account ID:</span>
@@ -88,7 +88,7 @@ export function ViewAccount() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium text-gray-600">Balance:</span>
-                  <span className="text-lg font-bold text-blue-600">${accountData.balance}</span>
+                  <span className="text-lg font-bold text-blue-600 animate-pulse-glow">${accountData.balance}</span>
                 </div>
               </div>
             </div>
@@ -96,7 +96,7 @@ export function ViewAccount() {
 
           {message.text && !accountData && (
             <div
-              className={`p-3 rounded-md text-sm ${
+              className={`p-3 rounded-md text-sm animate-slide-down transition-all duration-300 ${
                 message.type === 'success'
                   ? 'bg-green-50 text-green-800 border border-green-200'
                   : 'bg-red-50 text-red-800 border border-red-200'
