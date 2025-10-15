@@ -66,7 +66,7 @@ function App() {
         {/* Footer */}
         <div className="text-center text-sm text-gray-500 mt-8 animate-fade-in">
           <p className="bg-white px-4 py-2 rounded-full inline-block shadow-sm">
-            Backend running on http://localhost:8860
+            API Server: http://localhost:8860
           </p>
         </div>
       </div>
